@@ -1,49 +1,44 @@
 #include <gtk/gtk.h>
 
-// Simulate terminal output (replace with actual functionality)
-void append_to_output(GtkWidget *textview, const gchar *text) {
-    GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(textview));
-    GtkTextIter iter;
-    gtk_text_buffer_get_end_iter(buffer, &iter);
-    gtk_text_buffer_insert(buffer, &iter, text, -1);
-}
+// Function to initialize the GTK application
+static void activate(GtkApplication* app, gpointer user_data) {
+    // Create a new window
+    GtkWidget *window = gtk_application_window_new(app);
+    gtk_window_set_title(GTK_WINDOW(window), "Old CRT Terminal");
+    gtk_window_set_default_size(GTK_WINDOW(window), 800, 600);
 
-gboolean on_key_press(GtkWidget *widget, GdkEventKey *event, gpointer data) {
-    if (event->keyval == GDK_KEY_Return) {
-        // Process user input (replace with actual command execution)
-        const gchar *input_text = gtk_entry_get_text(GTK_ENTRY(widget));
-        g_print("User input: %s\n", input_text);
-        append_to_output(gtk_widget_get_parent(widget), "Simulated output\n");
-        gtk_entry_set_text(GTK_ENTRY(widget), "");
-    }
-    return TRUE;
-}
+    // Create a text view widget for displaying the terminal output
+    GtkWidget *textView = gtk_text_view_new();
+    gtk_text_view_set_editable(GTK_TEXT_VIEW(textView), FALSE);
 
-int main(int argc, char *argv[]) {
-    gtk_init(&argc, &argv);
+    // Create a scrolled window to contain the text view
+    GtkWidget *scrolledWindow = gtk_scrolled_window_new(NULL, NULL);
+    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolledWindow),
+                                   GTK_POLICY_AUTOMATIC,
+                                   GTK_POLICY_AUTOMATIC);
+    gtk_container_add(GTK_CONTAINER(scrolledWindow), textView);
 
-    GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    gtk_window_set_title(GTK_WINDOW(window), "Terminal Emulator");
-    g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
+    // Add the scrolled window to the window
+    gtk_container_add(GTK_CONTAINER(window), scrolledWindow);
 
-    GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
-    gtk_container_add(GTK_CONTAINER(window), vbox);
+    // Set CSS to emulate old CRT monitor
+    GtkCssProvider *cssProvider = gtk_css_provider_new();
+    gtk_css_provider_load_from_data(cssProvider,
+        "textview { background-color: #000000; color: #00FF00; font-family: monospace; }",
+        -1, NULL);
+    GtkStyleContext *context = gtk_widget_get_style_context(textView);
+    gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(cssProvider),
+                                   GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 
-    GtkWidget *textview = gtk_text_view_new();
-    gtk_text_view_set_editable(GTK_TEXT_VIEW(textview), FALSE);
-    gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(textview), GTK_WRAP_WORD);
-    gtk_box_pack_start(GTK_BOX(vbox), textview, TRUE, TRUE, 0);
-
-    GtkWidget *scrolled_window = gtk_scrolled_window_new(NULL, NULL);
-    gtk_container_add(GTK_CONTAINER(scrolled_window), textview);
-    gtk_box_pack_start(GTK_BOX(vbox), scrolled_window, TRUE, TRUE, 0);
-
-    GtkWidget *entry = gtk_entry_new();
-    g_signal_connect(entry, "key-press-event", G_CALLBACK(on_key_press), NULL);
-    gtk_box_pack_start(GTK_BOX(vbox), entry, FALSE, FALSE, 0);
-
+    // Show all widgets
     gtk_widget_show_all(window);
-    gtk_main();
+}
 
-    return 0;
+int main(int argc, char **argv) {
+    // Initialize GTK application
+    GtkApplication *app = gtk_application_new("org.example.crt_terminal", G_APPLICATION_FLAGS_NONE);
+    g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
+    int status = g_application_run(G_APPLICATION(app), argc, argv);
+    g_object_unref(app);
+    return status;
 }
