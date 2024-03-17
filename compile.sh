@@ -11,7 +11,7 @@ build_folder="Builds/$current_datetime"
 mkdir -p "$build_folder"
 
 # Compile c scripts into the build folder
-gcc Server-EXP.c -o "$build_folder/webserver" -lmicrohttpd
+gcc CDI.c -o "$build_folder/CDI" `pkg-config --cflags --libs gtk+-3.0`
 
 # Copy files into the build folder
 cp CDI.c "$build_folder/CDI.c"
