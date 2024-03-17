@@ -1,2 +1,2 @@
-# MainTemplate/stable
+# CDI/stable
 A template I use
