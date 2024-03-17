@@ -1,1 +1,1 @@
-gcc source_file.c -o output_file
+gcc CDI.c -o CDI
