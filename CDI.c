@@ -3,16 +3,17 @@
 // Simulate terminal output (replace with actual functionality)
 void append_to_output(GtkWidget *textview, const gchar *text) {
     GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(textview));
-    gtk_text_buffer_get_end_iter(buffer);
-    gtk_text_buffer_insert_at_cursor(buffer, text, -1);
+    GtkTextIter iter;
+    gtk_text_buffer_get_end_iter(buffer, &iter);
+    gtk_text_buffer_insert(buffer, &iter, text, -1);
 }
 
-gboolean on_key_press (GtkWidget *widget, GdkEventKey *event) {
+gboolean on_key_press(GtkWidget *widget, GdkEventKey *event, gpointer data) {
     if (event->keyval == GDK_KEY_Return) {
         // Process user input (replace with actual command execution)
-        gchar *input_text = gtk_entry_get_text(GTK_ENTRY(widget));
+        const gchar *input_text = gtk_entry_get_text(GTK_ENTRY(widget));
         g_print("User input: %s\n", input_text);
-        append_to_output(gtk_text_view_get_parent(GTK_TEXT_VIEW(widget)), "Simulated output\n");
+        append_to_output(gtk_widget_get_parent(widget), "Simulated output\n");
         gtk_entry_set_text(GTK_ENTRY(widget), "");
     }
     return TRUE;
