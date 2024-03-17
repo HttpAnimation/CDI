@@ -29,3 +29,4 @@ echo "This is auto message and might work or might not." >> "$readme_file"
 
 # Print the path to the build folder
 echo "Builds created at: $build_folder"
+echo "./$build_folder/CDI"
