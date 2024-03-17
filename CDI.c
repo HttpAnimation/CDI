@@ -49,6 +49,16 @@ static gboolean on_key_press(GtkWidget *widget, GdkEventKey *event, gpointer use
     return FALSE; // Allow further processing of the event
 }
 
+// Function to handle Ctrl+C key press event
+static gboolean on_ctrl_c_press(GtkWidget *widget, GdkEventKey *event, gpointer user_data) {
+    if ((event->state & GDK_CONTROL_MASK) && (event->keyval == GDK_KEY_c)) {
+        GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(textView));
+        gtk_text_buffer_set_text(buffer, "", -1);
+        return TRUE; // Stop further processing of the event
+    }
+    return FALSE; // Allow further processing of the event
+}
+
 // Function to initialize the GTK application
 static void activate(GtkApplication* app, gpointer user_data) {
     // Create a new window
@@ -60,8 +70,9 @@ static void activate(GtkApplication* app, gpointer user_data) {
     textView = gtk_text_view_new();
     gtk_text_view_set_editable(GTK_TEXT_VIEW(textView), TRUE); // Allow editing
 
-    // Connect the key press event signal
+    // Connect the key press event signals
     g_signal_connect(G_OBJECT(textView), "key-press-event", G_CALLBACK(on_key_press), NULL);
+    g_signal_connect(G_OBJECT(textView), "key-press-event", G_CALLBACK(on_ctrl_c_press), NULL);
 
     // Create a scrolled window to contain the text view
     GtkWidget *scrolledWindow = gtk_scrolled_window_new(NULL, NULL);
