@@ -1,4 +1,53 @@
 #include <gtk/gtk.h>
+#include <stdlib.h>
+#include <string.h>
+
+// Global variable for the text view widget
+GtkWidget *textView;
+
+// Function to append text to the text view widget
+void append_text(const char *text) {
+    GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(textView));
+    GtkTextIter iter;
+    gtk_text_buffer_get_end_iter(buffer, &iter);
+    gtk_text_buffer_insert(buffer, &iter, text, -1);
+}
+
+// Function to handle Enter key press event
+static gboolean on_key_press(GtkWidget *widget, GdkEventKey *event, gpointer user_data) {
+    if (event->keyval == GDK_KEY_Return) {
+        GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(textView));
+        GtkTextIter start, end;
+        gtk_text_buffer_get_bounds(buffer, &start, &end);
+        gchar *command = gtk_text_buffer_get_text(buffer, &start, &end, FALSE);
+
+        // Execute the command
+        FILE *fp;
+        char output[1024];
+        strcpy(output, "");
+        fp = popen(command, "r");
+        if (fp == NULL) {
+            append_text("Error executing command.\n");
+        } else {
+            while (fgets(output, sizeof(output), fp) != NULL) {
+                append_text(output);
+            }
+            pclose(fp);
+        }
+
+        // Append the command to the terminal log
+        append_text("\n");
+        append_text(command);
+        append_text("\n\n");
+
+        // Clear the text view for the next command
+        gtk_text_buffer_delete(buffer, &start, &end);
+        g_free(command);
+
+        return TRUE; // Stop further processing of the event
+    }
+    return FALSE; // Allow further processing of the event
+}
 
 // Function to initialize the GTK application
 static void activate(GtkApplication* app, gpointer user_data) {
@@ -8,8 +57,11 @@ static void activate(GtkApplication* app, gpointer user_data) {
     gtk_window_set_default_size(GTK_WINDOW(window), 800, 600);
 
     // Create a text view widget for displaying the terminal output
-    GtkWidget *textView = gtk_text_view_new();
+    textView = gtk_text_view_new();
     gtk_text_view_set_editable(GTK_TEXT_VIEW(textView), TRUE); // Allow editing
+
+    // Connect the key press event signal
+    g_signal_connect(G_OBJECT(textView), "key-press-event", G_CALLBACK(on_key_press), NULL);
 
     // Create a scrolled window to contain the text view
     GtkWidget *scrolledWindow = gtk_scrolled_window_new(NULL, NULL);
