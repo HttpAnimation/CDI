@@ -1,1 +1,1 @@
-gcc CDI.c -o CDI
+gcc CDI.c -o CDI `pkg-config --libs gtk+-3.0`
