@@ -9,7 +9,7 @@ static void activate(GtkApplication* app, gpointer user_data) {
 
     // Create a text view widget for displaying the terminal output
     GtkWidget *textView = gtk_text_view_new();
-    gtk_text_view_set_editable(GTK_TEXT_VIEW(textView), FALSE);
+    gtk_text_view_set_editable(GTK_TEXT_VIEW(textView), TRUE); // Allow editing
 
     // Create a scrolled window to contain the text view
     GtkWidget *scrolledWindow = gtk_scrolled_window_new(NULL, NULL);
