@@ -1,2 +1,1 @@
-qmake -project
-make
+gcc source_file.c -o output_file
